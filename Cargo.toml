@@ -1,6 +1,6 @@
 [package]
 name = "ask-cli"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Chiwa <chiwuabox@gmail.com>"]
 description = "A simple command line tool to use Google Gemini AI"
 edition = "2021"
