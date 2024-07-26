@@ -1,4 +1,4 @@
-allow-branch = ["main", "dev"]
+allow-branch = ["master", "dev"]
 publish = false
 pre-release-commit-message = "chore: Release ask-cli version {{version}}"
 tag-message = "chore: Release ask-cli version {{version}}"
