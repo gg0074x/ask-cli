@@ -42,3 +42,9 @@ Options:
   -V, --version          Print version
 ```
 
+## 🔨 Contributing
+
+- [ ] Code refactor
+- [ ] Use commands instead of flags
+- [ ] Support different AI models
+- [ ] Support other AI providers
