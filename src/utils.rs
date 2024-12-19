@@ -120,26 +120,25 @@ fn make_app_config(
 pub fn get_api_key(
     config_file: Option<File<config::FileSourceFile, config_parser::ConfigFile>>,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    if config_file.is_none() {
-        if let Ok(env_var) = env::var("GEMINI_TOKEN") {
-            Ok(env_var)
-        } else {
-            Err(errors::EmptyKey.into())
-        }
-    } else if let Ok(app) = make_app_config(config_file.unwrap()) {
-        if app.token.is_empty() {
-            if let Ok(env_var) = env::var("GEMINI_TOKEN") {
-                Ok(env_var)
-            } else {
-                Err(errors::EmptyKey.into())
-            }
-        } else {
-            Ok(app.token)
-        }
-    } else if let Ok(env_var) = env::var("GEMINI_TOKEN") {
-        return Ok(env_var);
+    #[inline(always)]
+    fn get_key_env() -> Result<String, Box<dyn std::error::Error>> {
+        env::var("GEMINI_TOKEN").or(Err(Into::<Box<dyn std::error::Error>>::into(
+            errors::EmptyKey,
+        )))
+    };
+
+    let Some(config) = config_file else {
+        return get_key_env();
+    };
+
+    let Ok(app) = make_app_config(config) else {
+        return get_key_env();
+    };
+
+    if app.token.is_empty() {
+        return get_key_env();
     } else {
-        return Err(errors::EmptyKey.into());
+        Ok(app.token)
     }
 }
 
