@@ -27,17 +27,16 @@ Alternatively you can pass your API key as an environment variable by executing:
 `export GEMINI_TOKEN=YOUR_API_KEY_HERE`  
 
 ```sh
-Usage: ask-cli [OPTIONS] --prompt <PROMPT>
+Usage: ask [OPTIONS] <COMMAND>
+
+Commands:
+  query    Ask the AI a question
+  execute  Ask the AI to execute a command in your terminal
+  help     Print this message or the help of the given subcommand(s)
 
 Options:
-  -t, --shell <SHELL>    
-        Specify the shell used when running with the execute option
-  -x, --execute          
-        Ask the AI to provide you with just a command and then ask you to execute it
+  -S, --shell <SHELL>    
   -s, --system <SYSTEM>  
-        Specify an optional system prompt to change the AI generation results
-  -p, --prompt <PROMPT>  
-        The prompt that the AI will respond to
   -h, --help             Print help
   -V, --version          Print version
 ```

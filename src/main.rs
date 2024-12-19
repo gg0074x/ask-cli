@@ -1,32 +1,16 @@
 use clap::Parser;
 use config::File;
+use std::env;
 use termimad::crossterm::style::{
     Attribute::Underlined,
     Color::{Black, Cyan, DarkYellow},
 };
 use utils::{create_config_dir, find_command, get_api_key, send_request};
-use std::env;
+mod args;
+mod command_execute;
 mod config_parser;
 mod errors;
 mod utils;
-mod command_execute;
-
-
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-struct Args {
-    #[arg(short = 't', long)]
-    shell: Option<String>,
-
-    #[arg(short = 'x', long)]
-    execute: bool,
-
-    #[arg(short, long)]
-    system: Option<String>,
-
-    #[arg(short, long)]
-    prompt: String,
-}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -40,20 +24,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
-    let args = Args::parse();
+    let args = args::Args::parse();
 
     let data: std::collections::HashMap<
         String,
         std::collections::HashMap<String, std::collections::HashMap<String, String>>,
-    > = if args.execute {
-        utils::parse_data(
-            args.prompt,
+    > = match args.cmd {
+        args::Commands::Execute { ref prompt } => utils::parse_data(
+            prompt.to_string(),
             Some(format!(
 "You will only respond to the prompt with just a one line {} terminal command after a > symbol",
             env::consts::OS)),
-        )
-    } else {
-        utils::parse_data(args.prompt, args.system)
+        ),
+        args::Commands::Query { ref prompt } => utils::parse_data(prompt.to_string(), args.system),
     };
 
     let client = reqwest::Client::new();
@@ -78,17 +61,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .and_then(|value| value.get("text"))
                     .and_then(|value| value.as_str())
                 {
-                    if args.execute {
-                        find_command(text, args.shell);
-                    } else {
-                        let mut skin = termimad::MadSkin::default();
-                        skin.bold.set_fg(Cyan);
-                        skin.italic.add_attr(Underlined);
-                        skin.code_block.set_bg(Black);
-                        skin.code_block.set_fg(DarkYellow);
+                    match args.cmd {
+                        args::Commands::Query { prompt: _ } => {
+                            let mut skin = termimad::MadSkin::default();
+                            skin.bold.set_fg(Cyan);
+                            skin.italic.add_attr(Underlined);
+                            skin.code_block.set_bg(Black);
+                            skin.code_block.set_fg(DarkYellow);
 
-                        skin.print_text(text);
+                            skin.print_text(text);
+                        }
+                        args::Commands::Execute { prompt: _ } => {
+                            find_command(text, args.shell);
+                        }
                     }
+
                     return Ok(());
                 } else if let Some(error) = response_json
                     .get("candidates")
