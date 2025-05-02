@@ -43,7 +43,7 @@ pub async fn send_request(
     api_token: String,
 ) -> Result<String, reqwest::Error> {
     match client
-        .post(format!("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={api_token}"))
+        .post(format!("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_token}"))
         .header(CONTENT_TYPE, "application/json")
         .json(&data)
         .send()
@@ -120,12 +120,11 @@ fn make_app_config(
 pub fn get_api_key(
     config_file: Option<File<config::FileSourceFile, config_parser::ConfigFile>>,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    #[inline(always)]
     fn get_key_env() -> Result<String, Box<dyn std::error::Error>> {
         env::var("GEMINI_TOKEN").or(Err(Into::<Box<dyn std::error::Error>>::into(
             errors::EmptyKey,
         )))
-    };
+    }
 
     let Some(config) = config_file else {
         return get_key_env();
@@ -136,7 +135,7 @@ pub fn get_api_key(
     };
 
     if app.token.is_empty() {
-        return get_key_env();
+        get_key_env()
     } else {
         Ok(app.token)
     }

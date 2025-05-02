@@ -51,3 +51,20 @@ impl std::fmt::Debug for CensorError {
 }
 
 impl error::Error for CensorError {}
+
+#[derive(Clone)]
+pub struct NoPromptError;
+
+impl fmt::Display for NoPromptError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "No prompt was provided, check help for instructions")
+    }
+}
+
+impl std::fmt::Debug for NoPromptError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "No prompt was provided, check help for instructions")
+    }
+}
+
+impl error::Error for NoPromptError {}
