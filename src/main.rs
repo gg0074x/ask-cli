@@ -30,13 +30,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         String,
         std::collections::HashMap<String, std::collections::HashMap<String, String>>,
     > = match args.cmd {
-        args::Commands::Execute { ref prompt } => utils::parse_data(
+        Some(args::Commands::Execute { ref prompt }) => utils::parse_data(
             prompt.to_string(),
             Some(format!(
 "You will only respond to the prompt with just a one line {} terminal command after a > symbol",
             env::consts::OS)),
         ),
-        args::Commands::Query { ref prompt } => utils::parse_data(prompt.to_string(), args.system),
+        Some(args::Commands::Query { ref prompt }) => {
+            utils::parse_data(prompt.to_string(), args.system)
+        }
+        None if args.prompt.is_some() => utils::parse_data(args.prompt.unwrap(), args.system),
+        None => return Err(errors::NoPromptError.into()),
     };
 
     let client = reqwest::Client::new();
@@ -62,7 +66,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .and_then(|value| value.as_str())
                 {
                     match args.cmd {
-                        args::Commands::Query { prompt: _ } => {
+                        Some(args::Commands::Query { prompt: _ }) | None => {
                             let mut skin = termimad::MadSkin::default();
                             skin.bold.set_fg(Cyan);
                             skin.italic.add_attr(Underlined);
@@ -71,7 +75,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                             skin.print_text(text);
                         }
-                        args::Commands::Execute { prompt: _ } => {
+                        Some(args::Commands::Execute { prompt: _ }) => {
                             find_command(text, args.shell);
                         }
                     }

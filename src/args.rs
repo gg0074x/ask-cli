@@ -1,17 +1,21 @@
-use std::path::PathBuf;
-
-use clap::{builder::Str, Parser, Subcommand};
+use clap::{Parser, Subcommand};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Args {
     #[clap(subcommand)]
-    pub cmd: Commands,
+    pub cmd: Option<Commands>,
 
-    #[arg(short = 'S', long)]
+    #[arg(
+        index = 1,
+        help = "Postional prompt argument used when no command is specified (ask by default)"
+    )]
+    pub prompt: Option<String>,
+
+    #[arg(short = 'S', long, help = "Shell to use for command execution")]
     pub shell: Option<String>,
 
-    #[arg(short, long)]
+    #[arg(short, long, help = "System prompt")]
     pub system: Option<String>,
 }
 
